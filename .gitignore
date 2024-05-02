@@ -161,3 +161,6 @@ cython_debug/
 
 # Added by Barrett S. Batten
 twitter_keys.json
+
+# Ignore CSV files
+*.csv
