@@ -25,19 +25,28 @@ print(token)
 client = tweepy.Client(bearer_token=token)
 
 # File path for the CSV
-file_path = 'tweets_2024_election.csv'
+file_path = 'tweets_2024_election_raw.csv'
 
 # Define the search query with explicit candidate names and keywords
 # For context, -has:links represents negated has links, filter tweets with links and exclude them
 # More context, -is:retweet filters out retweets, we want original posts
-query = '"Donald J Trump" OR "Trump" OR "Joe Biden" OR "Biden" OR "RFK Jr" OR "Kennedy" OR "2024 Presidential Election" OR "November 5th" -is:retweet -is:reply -has:links'
+query = (
+    '('
+    '"Donald J Trump" OR "Trump" OR "Joe Biden" OR "Biden" OR "RFK Jr" OR "Kennedy" OR '
+    '"2024 Presidential Election" OR "November 5th" OR "@BidenHQ" OR "#MAGA" OR '
+    '"#MakeAmericaGreatAgain" OR "#BidenHarris2024" OR "@TeamTrump" OR "#LetsGoBrandon" OR '
+    '"#KennedyShanahan24"'
+    ') '
+    '-is:retweet -is:reply -has:links lang:en'
+)
+print("Length of query: " + str(len(query)))
 # Specify the fields you want from the tweet and user
-tweet_fields = ['author_id', 'created_at', 'text', 'geo']
+tweet_fields = ['author_id', 'created_at', 'text', 'lang']
 user_fields = ['username']
 
 # Variables to track tweet count and requests
 total_tweets_collected = 0
-max_tweets = 1000
+max_tweets = 6504
 max_requests_per_15_min = 60  # Adjust based on your rate limit understanding
 
 # Continuously fetch tweets and handle pagination
@@ -64,18 +73,18 @@ while total_tweets_collected < max_tweets:
                 tweet.author_id,
                 users.get(tweet.author_id, 'Unknown'),  # Fetch username using author_id
                 tweet.created_at,
-                tweet.text,
-                tweet.geo['place_id'] if tweet.geo and 'place_id' in tweet.geo else None
+                tweet.text
+                # tweet.geo['place_id'] if tweet.geo and 'place_id' in tweet.geo else None
             ]
             for tweet in tweets
         ]
-        new_tweets_df = pd.DataFrame(new_data, columns=['User ID', 'Username', 'Date Created', 'Tweet', 'Geolocation'])
+        new_tweets_df = pd.DataFrame(new_data, columns=['User ID', 'Username', 'Date Created', 'Tweet'])
         # Convert user IDs to string to prevent scientific notation issues
         new_tweets_df['User ID'] = new_tweets_df['User ID'].astype(str)
 
         # Append to CSV file
         if os.path.exists(file_path):
-            new_tweets_df.to_csv(file_path, mode='a', header=False, index=False, quoting=csv.QUOTE_NONNUMERIC)
+            new_tweets_df.to_csv(file_path, mode='a', header=False, index=False, quoting=csv.QUOTE_NONNUMERIC, encoding='utf-8')
         else:
             new_tweets_df.to_csv(file_path, index=False)
         print(f"Appended {len(new_data)} new tweets to '{file_path}'. Total tweets collected: {total_tweets_collected + len(new_data)}")
