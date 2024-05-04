@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report, accuracy_score
 
@@ -15,18 +15,18 @@ data['Tweet'] = data['Tweet'].str.lower().str.replace('[^\w\s]', ' ')
 # Split data into train and test sets
 X_train, X_test, y_train, y_test = train_test_split(data['Tweet'], data['Sentiment'], test_size=0.2, random_state=42)
 
-# Define a pipeline combining a text feature extractor with a simple classifier
+# Define a pipeline combining a text feature extractor with a Random Forest classifier
 pipeline = Pipeline([
     ('vect', CountVectorizer()),
     ('tfidf', TfidfTransformer()),
-    ('clf', SVC()),
+    ('clf', RandomForestClassifier(random_state=42)),
 ])
 
 # Define parameter grid to search
 parameter_grid = {
-    'clf__kernel': ['linear', 'rbf', 'poly', 'sigmoid'],
-    'clf__C': [0.1, 1, 10],  # Regularization parameter
-    'clf__gamma': ['scale', 'auto'],  # Kernel coefficient for 'rbf', 'poly', 'sigmoid'
+    'clf__n_estimators': [100, 200, 300],  # Number of trees in the forest
+    'clf__max_depth': [None, 10, 20, 30],  # Maximum depth of the tree
+    'clf__min_samples_split': [2, 5, 10],  # Minimum number of samples required to split an internal node
     'tfidf__use_idf': (True, False),  # Optionally adding a parameter for the TfidfTransformer
     'vect__ngram_range': [(1, 1), (1, 2)],  # Using unigrams or bigrams
 }
