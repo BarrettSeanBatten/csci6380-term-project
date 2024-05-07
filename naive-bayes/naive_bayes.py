@@ -25,9 +25,9 @@ pipeline = Pipeline([
 # Define parameter grid to search
 parameter_grid = {
     'vect__max_df': (0.5, 0.75, 1.0), # ignore terms that have a document frequency higher than the threshold
-    'vect__min_df': (1, 2, 5), # ignore terms that have a document frequency lower than the threshold
+    'vect__min_df': (1, 2, 3), # ignore terms that have a document frequency lower than the threshold
     'vect__max_features': (None, 5000, 10000), # number of words the vectorizer will learn
-    'clf__alpha': (0.01, 0.1, 1), # additive smoothing parameter
+    'clf__alpha': (0.05, 0.075, 0.1), # additive smoothing parameter
     'tfidf__use_idf': (True, False), # Optionally adding a parameter for the TfidfTransformer
     'vect__ngram_range': [(1, 1), (1, 2)]  # Using unigrams or bigrams
 }
